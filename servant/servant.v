@@ -4,7 +4,7 @@ module servant
  input wire  wb_clk,
  input wire  wb_rst,
  output wire q,
- output wire gpio_clk, // rising edge = new value
+ output wire gpio_out_clk, // rising edge = new value
  output wire [31:0] gpio_out,
  output wire [31:0] gpio_out_n,
  output wire [31:0] gpio_out_ne,
@@ -13,7 +13,17 @@ module servant
  output wire [31:0] gpio_out_s,
  output wire [31:0] gpio_out_sw,
  output wire [31:0] gpio_out_w,
- output wire [31:0] gpio_out_nw
+ output wire [31:0] gpio_out_nw,
+ output wire gpio_in_clk, // rising edge = new value
+ output wire [31:0] gpio_in,
+ output wire [31:0] gpio_in_n,
+ output wire [31:0] gpio_in_ne,
+ output wire [31:0] gpio_in_e,
+ output wire [31:0] gpio_in_se,
+ output wire [31:0] gpio_in_s,
+ output wire [31:0] gpio_in_sw,
+ output wire [31:0] gpio_in_w,
+ output wire [31:0] gpio_in_nw
  );
 
    parameter memfile = "zephyr_hello.hex";
@@ -126,22 +136,32 @@ module servant
       .o_wb_dat (wb_timer_rdt));
 
    servant_gpio gpio
-     (.i_wb_clk   (wb_clk),
-      .i_wb_adr   (wb_gpio_adr),
-      .i_wb_dat   (wb_gpio_dat),
-      .i_wb_we    (wb_gpio_we),
-      .i_wb_cyc   (wb_gpio_stb),
-      .o_wb_rdt   (wb_gpio_rdt),
-      .o_gpio_clk (gpio_clk),
-      .o_gpio     (gpio_out),
-      .o_gpio_n   (gpio_out_n),
-      .o_gpio_ne  (gpio_out_ne),
-      .o_gpio_e   (gpio_out_e),
-      .o_gpio_se  (gpio_out_se),
-      .o_gpio_s   (gpio_out_s),
-      .o_gpio_sw  (gpio_out_sw),
-      .o_gpio_w   (gpio_out_w),
-      .o_gpio_nw  (gpio_out_nw)
+     (.i_wb_clk       (wb_clk),
+      .i_wb_adr       (wb_gpio_adr),
+      .i_wb_dat       (wb_gpio_dat),
+      .i_wb_we        (wb_gpio_we),
+      .i_wb_cyc       (wb_gpio_stb),
+      .o_wb_rdt       (wb_gpio_rdt),
+      .o_gpio_out_clk (gpio_out_clk),
+      .o_gpio_out     (gpio_out),
+      .o_gpio_out_n   (gpio_out_n),
+      .o_gpio_out_ne  (gpio_out_ne),
+      .o_gpio_out_e   (gpio_out_e),
+      .o_gpio_out_se  (gpio_out_se),
+      .o_gpio_out_s   (gpio_out_s),
+      .o_gpio_out_sw  (gpio_out_sw),
+      .o_gpio_out_w   (gpio_out_w),
+      .o_gpio_out_nw  (gpio_out_nw),
+      .i_gpio_in_clk  (gpio_in_clk),
+      .i_gpio_in      (gpio_in),
+      .i_gpio_in_n    (gpio_in_n),
+      .i_gpio_in_ne   (gpio_in_ne),
+      .i_gpio_in_e    (gpio_in_e),
+      .i_gpio_in_se   (gpio_in_se),
+      .i_gpio_in_s    (gpio_in_s),
+      .i_gpio_in_sw   (gpio_in_sw),
+      .i_gpio_in_w    (gpio_in_w),
+      .i_gpio_in_nw   (gpio_in_nw)
     );
     assign q = gpio_out[0];
 
