@@ -3,7 +3,18 @@ module servant
 (
  input wire  wb_clk,
  input wire  wb_rst,
- output wire q);
+ output wire q,
+ output wire gpio_clk, // rising edge = new value
+ output wire [31:0] gpio_out,
+ output wire [31:0] gpio_out_n,
+ output wire [31:0] gpio_out_ne,
+ output wire [31:0] gpio_out_e,
+ output wire [31:0] gpio_out_se,
+ output wire [31:0] gpio_out_s,
+ output wire [31:0] gpio_out_sw,
+ output wire [31:0] gpio_out_w,
+ output wire [31:0] gpio_out_nw
+ );
 
    parameter memfile = "zephyr_hello.hex";
    parameter memsize = 8192;
@@ -37,10 +48,11 @@ module servant
    wire [31:0] 	wb_mem_rdt;
    wire 	wb_mem_ack;
 
-   wire 	wb_gpio_dat;
+   wire [31:0]	wb_gpio_adr;
+   wire [31:0]	wb_gpio_dat;
    wire 	wb_gpio_we;
    wire 	wb_gpio_stb;
-   wire 	wb_gpio_rdt;
+   wire [31:0]	wb_gpio_rdt;
 
    wire [31:0] 	wb_timer_dat;
    wire 	wb_timer_we;
@@ -74,6 +86,7 @@ module servant
       .o_wb_cpu_rdt (wb_ext_rdt),
       .o_wb_cpu_ack (wb_ext_ack),
 
+      .o_wb_gpio_adr (wb_gpio_adr),
       .o_wb_gpio_dat (wb_gpio_dat),
       .o_wb_gpio_we  (wb_gpio_we),
       .o_wb_gpio_cyc (wb_gpio_stb),
@@ -113,12 +126,24 @@ module servant
       .o_wb_dat (wb_timer_rdt));
 
    servant_gpio gpio
-     (.i_wb_clk (wb_clk),
-      .i_wb_dat (wb_gpio_dat),
-      .i_wb_we  (wb_gpio_we),
-      .i_wb_cyc (wb_gpio_stb),
-      .o_wb_rdt (wb_gpio_rdt),
-      .o_gpio   (q));
+     (.i_wb_clk   (wb_clk),
+      .i_wb_adr   (wb_gpio_adr),
+      .i_wb_dat   (wb_gpio_dat),
+      .i_wb_we    (wb_gpio_we),
+      .i_wb_cyc   (wb_gpio_stb),
+      .o_wb_rdt   (wb_gpio_rdt),
+      .o_gpio_clk (gpio_clk),
+      .o_gpio     (gpio_out),
+      .o_gpio_n   (gpio_out_n),
+      .o_gpio_ne  (gpio_out_ne),
+      .o_gpio_e   (gpio_out_e),
+      .o_gpio_se  (gpio_out_se),
+      .o_gpio_s   (gpio_out_s),
+      .o_gpio_sw  (gpio_out_sw),
+      .o_gpio_w   (gpio_out_w),
+      .o_gpio_nw  (gpio_out_nw)
+    );
+    assign q = gpio_out[0];
 
    serv_rf_ram
      #(.width (rf_width),
