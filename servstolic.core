@@ -1,0 +1,173 @@
+CAPI=2:
+
+name : ::servstolic:0.1.0
+
+filesets:
+  # Common filesets
+  mem_files:
+    files:
+      - sw/blinky.hex       : {copyto : blinky.hex}
+      - sw/zephyr_hello.hex : {copyto : zephyr_hello.hex}
+    file_type : user
+
+  servstolic_tb:
+    files:
+      - servstolic/bench/servstolic_tb.v
+    file_type : verilogSource
+    depend : [vlog_tb_utils]
+
+  service:
+    files:
+      - servant/ice40_pll.v
+      - servant/service_clock_gen.v
+      - servant/service.v
+    file_type : verilogSource
+    depend : ["fusesoc:utils:generators"]
+
+  soc:
+    files:
+      - servant/rtl/servant.v
+    file_type : verilogSource
+    depend : [servile, "mdu? (mdu)"]
+
+  verilator_tb:
+    files:
+      - bench/servant_sim.v
+      - "vidbo? (bench/servant_tb_vidbo.cpp)" : {file_type : cppSource}
+      - "!vidbo? (bench/servant_tb.cpp)" : {file_type : cppSource}
+    file_type : verilogSource
+    depend : ["vidbo? (vidbo)"]
+
+targets:
+  default:
+    filesets : [soc]
+
+  sim:
+    default_tool: icarus
+    filesets : [soc, servant_tb]
+    parameters :
+      - RISCV_FORMAL
+      - "mdu? (MDU=1)"
+      - SERV_CLEAR_RAM=true
+      - firmware
+      - memsize
+    toplevel : servant_tb
+
+  verilator_tb:
+    filesets : [soc, verilator_tb]
+    flow: sim
+    flow_options:
+      tool: verilator
+      verilator_options : [--trace]
+    parameters :
+      - RISCV_FORMAL
+      - "mdu? (MDU=1)"
+      - cps
+      - firmware
+      - memsize
+      - signature
+      - timeout
+      - trace_pc
+      - uart_baudrate
+      - vcd
+      - vcd_start
+      - compressed
+      - align
+      - with_csr=1
+    toplevel : servant_sim
+
+parameters:
+  align:
+    datatype    : int
+    description : Enable/Disable the Misaligned access of instruction
+    paramtype   : vlogparam
+
+  compressed:
+    datatype    : int
+    description : Enable/Disable the Compressed extension
+    paramtype   : vlogparam
+
+  cps:
+    datatype : bool
+    description: Write simulated cycles per second to a text file named cps
+    paramtype : plusarg
+
+  firmware:
+    datatype : file
+    description : Preload RAM with a hex file at runtime (overrides memfile)
+    paramtype : plusarg
+
+  frequency:
+    datatype    : int
+    description : PLL output frequency in MHz
+    paramtype   : vlogparam
+
+  MDU:
+    datatype  : int
+    description : Enables RISC-V standard M-extension
+    paramtype : vlogdefine
+
+  memfile:
+    datatype    : file
+    description : Preload RAM with a hex file at compile-time
+    paramtype   : vlogparam
+
+  memsize:
+    datatype    : int
+    default     : 8192
+    description : Memory size in bytes for RAM (default 8kiB)
+    paramtype   : vlogparam
+
+  PLL:
+    datatype : str
+    description : PLL type to use for main clock generation
+    paramtype : vlogparam
+
+  RISCV_FORMAL:
+    datatype  : bool
+    paramtype : vlogdefine
+
+  SERV_CLEAR_RAM:
+    datatype  : bool
+    paramtype : vlogdefine
+
+  signature:
+    datatype : file
+    paramtype : plusarg
+
+  timeout:
+    datatype : int
+    paramtype : plusarg
+
+  trace_pc:
+    datatype : bool
+    paramtype : plusarg
+
+  uart_baudrate:
+    datatype : int
+    description : Treat q output as an UART with the specified baudrate (0 or omitted parameter disables UART decoding)
+    paramtype : plusarg
+
+  vcd:
+    datatype : bool
+    paramtype : plusarg
+
+  vcd_start:
+    datatype    : int
+    description : Delay start of VCD dumping until the specified time
+    paramtype   : plusarg
+
+  with_csr:
+    datatype    : int
+    description : Enable/Disable CSR support
+    paramtype   : vlogparam
+
+  WITH_RESET:
+    datatype    : bool
+    default     : true
+    description : Enable reset input (for supported targets)
+    paramtype   : vlogdefine
+
+generate:
+  ice40pll:
+    generator: icepll
