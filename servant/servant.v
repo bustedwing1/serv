@@ -3,6 +3,8 @@ module servant
 (
  input wire  wb_clk,
  input wire  wb_rst,
+ output wire qclk,
+ output wire [31:0] qbus,
  output wire q);
 
    parameter memfile = "zephyr_hello.hex";
@@ -13,6 +15,7 @@ module servant
    parameter [0:0] compress = 0;
    parameter [0:0] align = compress;
 
+   assign q = qbus[0];
 
 `ifdef MDU
    localparam [0:0] with_mdu = 1'b1;
@@ -37,10 +40,10 @@ module servant
    wire [31:0] 	wb_mem_rdt;
    wire 	wb_mem_ack;
 
-   wire 	wb_gpio_dat;
+   wire [31:0]	wb_gpio_dat;
    wire 	wb_gpio_we;
    wire 	wb_gpio_stb;
-   wire 	wb_gpio_rdt;
+   wire [31:0]	wb_gpio_rdt;
 
    wire [31:0] 	wb_timer_dat;
    wire 	wb_timer_we;
@@ -113,12 +116,14 @@ module servant
       .o_wb_dat (wb_timer_rdt));
 
    servant_gpio gpio
-     (.i_wb_clk (wb_clk),
-      .i_wb_dat (wb_gpio_dat),
-      .i_wb_we  (wb_gpio_we),
-      .i_wb_cyc (wb_gpio_stb),
-      .o_wb_rdt (wb_gpio_rdt),
-      .o_gpio   (q));
+     (.i_wb_clk   (wb_clk),
+      .i_wb_adr   (wb_ext_adr),
+      .i_wb_dat   (wb_gpio_dat),
+      .i_wb_we    (wb_gpio_we),
+      .i_wb_cyc   (wb_gpio_stb),
+      .o_wb_rdt   (wb_gpio_rdt),
+      .o_gpio_clk (qclk),
+      .o_gpio     (qbus));
 
    serv_rf_ram
      #(.width (rf_width),

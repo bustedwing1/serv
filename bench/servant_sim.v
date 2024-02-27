@@ -12,6 +12,9 @@ module servant_sim
    parameter compressed = 0;
    parameter align = compressed;
 
+   wire [31:0] qbus;
+   wire        qclk;
+
    reg [1023:0] firmware_file;
    initial
      if ($value$plusargs("firmware=%s", firmware_file)) begin
@@ -26,7 +29,12 @@ module servant_sim
        .with_csr (with_csr),
        .compress (compressed[0:0]),
        .align    (align[0:0]))
-   dut(wb_clk, wb_rst, q);
+   dut(
+     .wb_clk(wb_clk), 
+     .wb_rst(wb_rst),
+     .qclk(qclk),
+     .qbus(qbus),
+     .q(q));
 
    assign pc_adr = dut.wb_mem_adr;
    assign pc_vld = dut.wb_mem_ack;
