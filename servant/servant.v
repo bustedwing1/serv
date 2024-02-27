@@ -1,10 +1,16 @@
 `default_nettype none
 module servant
 (
- input wire  wb_clk,
- input wire  wb_rst,
- output wire qclk,
- output wire [31:0] qbus,
+ input wire        wb_clk,
+ input wire        wb_rst,
+ input wire [31:0] i_wb_proc_adr,
+ input wire [31:0] i_wb_proc_dat,
+ input wire [3:0]  i_wb_proc_sel,
+ input wire        i_wb_proc_we,
+ input wire        i_wb_proc_stb,
+ output wire [31:0] o_wb_proc_rdt,
+ output wire        o_wb_proc_ack,
+ 
  output wire q);
 
    parameter memfile = "zephyr_hello.hex";
@@ -15,6 +21,8 @@ module servant
    parameter [0:0] compress = 0;
    parameter [0:0] align = compress;
 
+
+   wire [31:0] qbus;
    assign q = qbus[0];
 
 `ifdef MDU
@@ -95,6 +103,15 @@ module servant
      (// Wishbone interface
       .i_wb_clk (wb_clk),
       .i_wb_rst (wb_rst),
+      
+      .i_wb_proc_adr(i_wb_proc_adr),
+      .i_wb_proc_dat(i_wb_proc_dat),
+      .i_wb_proc_sel(i_wb_proc_sel),
+      .i_wb_proc_we(i_wb_proc_we),
+      .i_wb_proc_stb(i_wb_proc_stb),
+      .o_wb_proc_rdt(o_wb_proc_rdt),
+      .o_wb_proc_ack(o_wb_proc_ack),
+      
       .i_wb_adr (wb_mem_adr[$clog2(memsize)-1:2]),
       .i_wb_cyc (wb_mem_stb),
       .i_wb_we  (wb_mem_we) ,
@@ -116,14 +133,13 @@ module servant
       .o_wb_dat (wb_timer_rdt));
 
    servant_gpio gpio
-     (.i_wb_clk   (wb_clk),
-      .i_wb_adr   (wb_ext_adr),
-      .i_wb_dat   (wb_gpio_dat),
-      .i_wb_we    (wb_gpio_we),
-      .i_wb_cyc   (wb_gpio_stb),
-      .o_wb_rdt   (wb_gpio_rdt),
-      .o_gpio_clk (qclk),
-      .o_gpio     (qbus));
+     (.i_wb_clk (wb_clk),
+      .i_wb_adr (wb_ext_adr),
+      .i_wb_dat (wb_gpio_dat),
+      .i_wb_we  (wb_gpio_we),
+      .i_wb_cyc (wb_gpio_stb),
+      .o_wb_rdt (wb_gpio_rdt),
+      .o_gpio   (qbus));
 
    serv_rf_ram
      #(.width (rf_width),

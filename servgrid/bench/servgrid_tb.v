@@ -25,13 +25,13 @@ module tb;
   wire [31:0] pc_adr;
   wire	      pc_vld;
 
-//   wire [31:0] i_wb_proc_adr = 32'h0;
-//   wire [31:0] i_wb_proc_dat = 32'h0;
-//   wire [3:0]  i_wb_proc_sel = 4'h0;
-//   wire        i_wb_proc_we  = 0;
-//   wire        i_wb_proc_stb = 0;
-//   wire [31:0] o_wb_proc_rdt;
-//   wire        o_wb_proc_ack;
+  wire [31:0] i_wb_proc_adr = 32'h0;
+  wire [31:0] i_wb_proc_dat = 32'h0;
+  wire [3:0]  i_wb_proc_sel = 4'h0;
+  wire        i_wb_proc_we  = 0;
+  wire        i_wb_proc_stb = 0;
+  wire [31:0] o_wb_proc_rdt;
+  wire        o_wb_proc_ack;
 
   // ==========================================================================
   // Generate a clock that toggles every 5nsec, resulting in a 100MHz pulsing
@@ -68,13 +68,14 @@ module tb;
     .wb_clk(wb_clk),  // input
     .wb_rst(wb_rst),  // input
 
-//     .i_wb_proc_adr(i_wb_proc_adr),
-//     .i_wb_proc_dat(i_wb_proc_dat),
-//     .i_wb_proc_sel(i_wb_proc_sel),
-//     .i_wb_proc_we(i_wb_proc_we),
-//     .i_wb_proc_stb(i_wb_proc_stb),
-//     .o_wb_proc_rdt(o_wb_proc_rdt),
-//     .o_wb_proc_ack(o_wb_proc_ack),
+    .i_wb_proc_adr(i_wb_proc_adr),
+    .i_wb_proc_dat(i_wb_proc_dat),
+    .i_wb_proc_sel(i_wb_proc_sel),
+    .i_wb_proc_we(i_wb_proc_we),
+    .i_wb_proc_stb(i_wb_proc_stb),
+    .o_wb_proc_rdt(o_wb_proc_rdt),
+    .o_wb_proc_ack(o_wb_proc_ack),
+
     .q(q)             // output
   );
 

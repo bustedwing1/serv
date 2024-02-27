@@ -7,6 +7,15 @@ module servant_ram
     parameter memfile = "")
    (input wire 		i_wb_clk,
     input wire 		i_wb_rst,
+
+    input wire [31:0]   i_wb_proc_adr,
+    input wire [31:0]   i_wb_proc_dat,
+    input wire [3:0]    i_wb_proc_sel,
+    input wire          i_wb_proc_we,
+    input wire          i_wb_proc_stb,
+    output reg  [31:0]  o_wb_proc_rdt,
+    output reg          o_wb_proc_ack,
+
     input wire [aw-1:2] i_wb_adr,
     input wire [31:0] 	i_wb_dat,
     input wire [3:0] 	i_wb_sel,
@@ -33,6 +42,11 @@ module servant_ram
       if (we[2]) mem[addr][23:16] <= i_wb_dat[23:16];
       if (we[3]) mem[addr][31:24] <= i_wb_dat[31:24];
       o_wb_rdt <= mem[addr];
+
+      if (i_wb_proc_we & i_wb_proc_stb) mem[i_wb_proc_adr[aw-1:2]] <= i_wb_dat;
+      o_wb_proc_rdt <= mem[addr];
+      o_wb_proc_ack <= i_wb_proc_stb & !o_wb_proc_ack;
+
    end
 
    initial
